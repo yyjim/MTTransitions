@@ -65,13 +65,24 @@ public class MTTransition: NSObject, MTIUnaryFilter {
     
     var kernel: MTIRenderPipelineKernel {
         let vertexDescriptor = MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName)
-        let fragmentDescriptor = MTIFunctionDescriptor(name: fragmentName, libraryURL: MTIDefaultLibraryURLForBundle(Bundle(for: MTTransition.self)))
+        #if SWIFT_PACKAGE
+        guard let libraryURL = Bundle.module.url(forResource: "default", withExtension: "metallib", subdirectory: "Shaders") else {
+            fatalError("Shaders/default.metallib is missing from the package bundle. Run compile_metal_shaders.sh.")
+        }
+        #else
+        let libraryURL = MTIDefaultLibraryURLForBundle(Bundle(for: MTTransition.self))
+        #endif
+        let fragmentDescriptor = MTIFunctionDescriptor(name: fragmentName, libraryURL: libraryURL)
         let kernel = MTIRenderPipelineKernel(vertexFunctionDescriptor: vertexDescriptor, fragmentFunctionDescriptor: fragmentDescriptor)
         return kernel
     }
     
     private func samplerImage(name: String) -> MTIImage? {
+        #if SWIFT_PACKAGE
+        let bundle = Bundle.module
+        #else
         let bundle = Bundle(for: MTTransition.self)
+        #endif
         guard let bundleUrl = bundle.url(forResource: "Assets", withExtension: "bundle"),
             let resourceBundle = Bundle(url: bundleUrl) else {
             return nil

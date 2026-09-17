@@ -98,11 +98,39 @@ Support Following Transitions:
 
 ## Installation
 
+### CocoaPods
+
 MTTransitions is available through CocoaPods. To install it, simply add the following line to your Podfile:
 
 ```sh
 pod MTTransitions
 ```
+
+### Swift Package Manager
+
+Add `https://github.com/alexiscn/MTTransitions.git` as a package dependency in Xcode, or declare it in your `Package.swift`:
+
+```swift
+.package(url: "https://github.com/alexiscn/MTTransitions.git", from: "1.6.6")
+```
+
+The package requires iOS 16, while the CocoaPods spec still supports iOS 11.
+
+CocoaPods compiles the `.metal` sources into the pod framework, but SwiftPM cannot
+(the shaders `#include "MTIShaderLib.h"` from MetalPetal). The package therefore ships
+a precompiled `Source/Resources/Shaders/default.metallib`, which is checked into the
+repository.
+
+**Whenever you add or change a `.metal` file under `Source/Transitions`, regenerate it:**
+
+```sh
+./compile_metal_shaders.sh
+```
+
+The script needs the Metal toolchain (`xcodebuild -downloadComponent MetalToolchain`)
+and MetalPetal's headers, so run `pod install` or `swift package resolve` first. Commit
+the regenerated library along with the shader change — a stale library shows up at runtime
+as a missing fragment function, not as a build failure.
 
 ## Get Started
 
