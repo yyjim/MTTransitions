@@ -25,12 +25,12 @@ public final class MTViewControllerTransition: NSObject, UIViewControllerAnimate
             return
         }
         let containerView = transitionContext.containerView
-        let fromSnapShotImage = containerView.layer.snapshot
+        let fromSnapShotImage = containerView.takeSnapshot()
         
         fromView.alpha = 0
         toView.frame = transitionContext.finalFrame(for: toVC)
         containerView.addSubview(toView)
-        let toSnapShotImage = containerView.layer.snapshot
+        let toSnapShotImage = containerView.takeSnapshot()
         
         guard let fromImage = mtiImage(from: fromSnapShotImage?.cgImage), let toImage = mtiImage(from: toSnapShotImage?.cgImage) else {
             transitionContext.completeTransition(true)
@@ -71,5 +71,14 @@ public final class MTViewControllerTransition: NSObject, UIViewControllerAnimate
         self.duration = duration
         self.transition = effect.transition
         self.transition.duration = duration
+    }
+}
+
+private extension UIView {
+    func takeSnapshot() -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(bounds.size, false, 0)
+        defer { UIGraphicsEndImageContext() }
+        drawHierarchy(in: bounds, afterScreenUpdates: true)
+        return UIGraphicsGetImageFromCurrentImageContext()
     }
 }
